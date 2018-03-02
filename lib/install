@@ -1,0 +1,10 @@
+#!/bin/sh
+rm -r lib/make/__p* 2> /dev/null
+rm -r lib/make/*.pyc 2> /dev/null
+rm -r lib/make/core/__p* 2> /dev/null
+rm -r lib/make/core/*.pyc 2> /dev/null
+rm -r lib/make/compiler/__p* 2> /dev/null
+rm -r lib/make/compiler/*.pyc 2> /dev/null
+
+rsync -a lib/make/* ~/lib/python/make
+rsync -a lib/pym.py ~/lib/pym/
