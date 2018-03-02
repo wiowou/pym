@@ -1,8 +1,6 @@
-'''
-Created on Mar 1, 2018
+import os
+import shutil
 
-@author: bk
-'''
 class Makefile():
     def __init__(self,name=''):
         self.name = name
@@ -29,6 +27,10 @@ class Makefile():
         for s in source.values():
             fout.write(str(s)+'\n')
         fout.close()
+        if (not os.path.exists('ob')):
+            os.makedirs('ob')
+        if (os.path.exists('__pycache__')):
+            shutil.rmtree('__pycache__',True)
     
     def find(self,targName):
         for t in self.target:

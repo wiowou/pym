@@ -8,7 +8,7 @@ class Compiler(object):
         self.ext = []
         self.exclude = []
     
-    def vname(self):
+    def vcmd(self):
         return '${CC' + self.name + '}'
     
     def voptions(self):
@@ -22,12 +22,12 @@ class Compiler(object):
         #only keep the headers that exist in the root directory
         hdr = []
         for i in allHdr:
-            i = os.path.realpath(i)
+            #i = os.path.realpath(i)
             if (os.path.exists(i)):
                 hdr.append(i)
             else:
                 for d in self.includeDir:
-                    d = os.path.realpath(d)
+                    #d = os.path.realpath(d)
                     di = os.path.join(d,i)
                     if (os.path.exists(di)):
                         hdr.append(di)
@@ -51,7 +51,7 @@ class Compiler(object):
         return inc
         
     def __str__(self):
-        s = self.vname()[2:-1] + ' = ' + self.cmdName + '\n'
+        s = self.vcmd()[2:-1] + ' = ' + self.cmdName + '\n'
         s += self.voptions()[2:-1] + ' = ' + self.options + '\n'
         s += self.vinclude()[2:-1] + ' = ' + self._incStr_() + '\n'
         return s

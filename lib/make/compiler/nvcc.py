@@ -5,7 +5,7 @@ Created on Feb 3, 2018
 '''
 from make.compiler import Compiler
 
-class NVCC(Compiler):
+class CC(Compiler):
     def __init__(self):
         Compiler.__init__(self)
         self.cmdName = 'nvcc'
@@ -39,9 +39,9 @@ class NVCC(Compiler):
     def singleUnitCompilation(self):
         self.compilationMethod = ' -c'
 
-class Exe(NVCC):
+class Exe(CC):
     def __init__(self):
-        NVCC.__init__(self)
+        CC.__init__(self)
         self.name = 'nvidia-cuda-exe'
         self.includeDir = []
         self.libraryDir = []
@@ -79,9 +79,9 @@ class Exe(NVCC):
             liba += ' -l' + l[3:-2]
         return self.cmdName + opt + objects + ' -o ' + targetName + ldir + idir + liba + libso
 
-class Shared(NVCC):
+class Shared(CC):
     def __init__(self):
-        NVCC.__init__(self)
+        CC.__init__(self)
         self.name = 'nvidia-cuda-shared'
         self.options = "-compiler-options '-fPIC' "
         self.includeDir = []
@@ -109,9 +109,9 @@ class Shared(NVCC):
             lib += "--compiler-options '-Wl,--no-whole-archive'"
         return self.cmdName + opt + objects + ' -o ' + targetName + ldir + idir + lib
 
-class Static(NVCC):
+class Static(CC):
     def __init__(self):
-        NVCC.__init__(self)
+        CC.__init__(self)
         self.name = 'nvidia-cuda-archiver'
         self.options = '--lib'
 
@@ -122,9 +122,9 @@ class Static(NVCC):
             objects += ' ' + o
         return 'nvcc' + opt + ' ' + targetName + objects
 
-class HostLinkObject(NVCC):
+class HostLinkObject(CC):
     def __init__(self):
-        NVCC.__init__(self)
+        CC.__init__(self)
         self.name = 'nvidia-cuda-host-link-object'
         self.options = '--device-link'
 

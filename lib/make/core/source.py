@@ -11,7 +11,7 @@ class Source(object):
     
     def __str__(self):
         s = self.objName() + ' : ' + self.name
-        header = self.compiler.headerDep()
+        header = self.compiler.headerDep(self.name)
         for h in header:
             s += ' ' + h
         s += '\n'
@@ -24,7 +24,10 @@ class Source(object):
         return i
     
     def objName(self):
-        o = self.id() + '.o'
+        objectFileExt = '.o'
+        if (os.name == 'nt'):
+            objectFileExt = '.obj'
+        o = self.id() + objectFileExt
         outputDir = self.outputDir
         if (outputDir == ''):
             outputDir = 'ob'
