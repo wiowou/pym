@@ -6,11 +6,9 @@ class GNU_Compiler(Compiler):
         self.options = ''
 
     def _sourceToObjectCommand_(self,objFileName,srcName):
-        opt = ' ' + self.options
-        idir = ''
-        for i in self.includeDir:
-            idir += ' -I' + i
-        return self.cmdName + ' -c' + idir + opt + ' -o ' + objFileName + ' ' + srcName
+        s = self.vcmd() + ' ' + self.voptions() + self._incStr_()
+        s += '-o ' + objFileName + ' ' + srcName
+        return s
     
     def _findIncludeFiles_(self, srcName):
         idep = []
@@ -35,29 +33,27 @@ class GNUExe(Compiler):
     def _buildCommand_(self,objNames,targetName):
         sharedLibrary = [e for e in self.library if e[-3:] == '.so']
         staticLibrary = [e for e in self.library if e[-2:] == '.a']
-        opt = ' ' + self.options
-        objects = ' '
+        objects = ''
         for o in objNames:
             objects += ' ' + o
-        ldir = ''
+        ldir = ' '
         for l in self.libraryDir:
             ldir += ' -L' + l
-        idir = ''
-        for i in self.includeDir:
-            idir += ' -I' + i
         libso = ' '
         if len(sharedLibrary) > 0 and len(staticLibrary) > 0:
             libso = ' -Wl,-Bdynamic'
         for l in sharedLibrary:
             libso += ' -l' + l[3:-3]
-        liba = ''
+        liba = ' '
         if len(staticLibrary) > 0:
             liba = ' -Wl,-Bstatic'
             if (len(sharedLibrary) == 0):
                 liba = ' -static'
         for l in staticLibrary:
             liba += ' -l' + l[3:-2]
-        return self.cmdName + opt + objects + ' -o ' + targetName + ldir + idir + liba + libso
+        s = self.vcmd() + ' ' + self.voptions() + self._incStr_() + objects
+        s += ' -o ' + targetName + ldir + liba + libso
+        return s
 
 class SharedLib(Compiler):
     def __init__(self):
@@ -68,24 +64,21 @@ class SharedLib(Compiler):
         self.options = ''
 
     def _buildCommand_(self,objNames,targetName):
-        opt = ' -shared -fPIC ' + self.options
+        opt = ' -shared -fPIC ' + self.voptions()
         objects = ' '
         for o in objNames:
             objects += ' ' + o
-        ldir = ''
+        ldir = ' '
         for l in self.libraryDir:
             ldir += ' -L' + l
-        idir = ''
-        for i in self.includeDir:
-            idir += ' -I' + i
-        lib = ''
+        lib = ' '
         if (len(self.library) > 0):
             lib = '-Wl,--whole-archive'
         for l in self.library:
             lib += ' -l' + l
         if (len(self.library) > 0):
             lib += ' -Wl,--no-whole-archive'
-        return self.cmdName + opt + objects + ' -o ' + targetName + ldir + idir + lib
+        return self.vcmd() + opt + objects + ' -o ' + targetName + ldir + self._incStr_() + lib
 
 class StaticLib(Compiler):
     def __init__(self):
@@ -104,7 +97,7 @@ class CC(GNU_Compiler):
     def __init__(self):
         GNU_Compiler.__init__(self)
         self.cmdName = 'g++'
-        self.name = 'gnu_c++'
+        self.name = 'gp'
         self.ext = ['cpp','cxx','CC','CXX','cc','c++','C']
         self.exclude = []
 
@@ -112,17 +105,17 @@ class Exe(GNUExe,CC):
     def __init__(self):
         GNUExe.__init__(self)
         CC.__init__(self)
-        self.name = 'gnu_c++_exe'
+        self.name = 'gpe'
 
 class Shared(SharedLib,CC):
     def __init__(self):
         SharedLib.__init__(self)
         CC.__init__(self)
         self.options = 'fPIC'
-        self.name = 'gnu_c++_shared'
+        self.name = 'gps'
 
 class Static(StaticLib,CC):
     def __init__(self):
         StaticLib.__init__(self)
         CC.__init__(self)
-        self.name = 'gnu_c++_static' 
+        self.name = 'gpa' 

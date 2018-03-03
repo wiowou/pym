@@ -1,3 +1,5 @@
+import os 
+
 class Target(object):
     def __init__(self,name,compiler):
         self.name = name
@@ -5,8 +7,16 @@ class Target(object):
         self.target = []
         self.source = []
     
+    def callName(self):
+        return os.path.basename(self.name)
+    
     def __str__(self):
-        s = self.name + ' : '
+        s = ''
+        callName = self.callName()
+        if (not self.name == callName):
+            s += callName + ' : ' + self.name + '\n'
+            #s += '\t echo \n' 
+        s += self.name + ' : '
         for t in self.target:
             s += t.name + ' '
         objStr = ''

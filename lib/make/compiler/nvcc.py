@@ -9,17 +9,25 @@ class CC(Compiler):
     def __init__(self):
         Compiler.__init__(self)
         self.cmdName = 'nvcc'
-        self.name = 'nvidia-cuda-compiler'
+        self.name = 'nv'
         self.options = ''
         self.ext = ['cu','CU','cpp','cxx','CPP','CXX','cc','c++','C','c']
-        self.compilationMethod = ' -dc'
-
-    def _sourceToObjectCommand_(self,objFileName,srcName):
-        opt = ' ' + self.options
+    
+    def _incStr_(self):
         idir = ''
+        j = 0
         for i in self.includeDir:
-            idir += ' -I' + i
-        return self.cmdName + self.compilationMethod + idir + opt + ' -o ' + objFileName + ' ' + srcName
+            if (j == 0):
+                idir += ' -I' + i
+            else:
+                idir += ',' + i
+            j += 1
+        return idir + ' '        
+    
+    def _sourceToObjectCommand_(self,objFileName,srcName):
+        s = self.vcmd() + ' ' + self.voptions() + self._incStr_()
+        s += '-o ' + objFileName + ' ' + srcName
+        return s
     
     def _findIncludeFiles_(self, srcName):
         idep = []
@@ -32,17 +40,11 @@ class CC(Compiler):
                     i = i[1:-1]
                     idep.append(i)
         return idep
-    
-    def separateUnitCompilation(self):
-        self.compilationMethod = ' -dc'
-    
-    def singleUnitCompilation(self):
-        self.compilationMethod = ' -c'
 
 class Exe(CC):
     def __init__(self):
         CC.__init__(self)
-        self.name = 'nvidia-cuda-exe'
+        self.name = 'nve'
         self.includeDir = []
         self.libraryDir = []
         self.library = [] #examples are libadd.so, libadd.a
@@ -51,38 +53,32 @@ class Exe(CC):
     def _buildCommand_(self,objNames,targetName):
         sharedLibrary = [e for e in self.library if e[-3:] == '.so']
         staticLibrary = [e for e in self.library if e[-2:] == '.a']
-        opt = ' ' + self.options
-        objects = ' '
+        objects = ''
         for o in objNames:
             objects += ' ' + o
-        ldir = ''
+        ldir = ' '
         for l in self.libraryDir:
             ldir += ' -L' + l
-        idir = ''
-        j = 0
-        for i in self.includeDir:
-            if (j == 0):
-                idir += ' -I' + i
-            else:
-                idir += ',' + i
         libso = ' '
         if len(sharedLibrary) > 0 and len(staticLibrary) > 0:
             libso = " --compiler-options '-Wl,-Bdynamic'"
         for l in sharedLibrary:
             libso += ' -l' + l[3:-3]
-        liba = ''
+        liba = ' '
         if len(staticLibrary) > 0:
             liba = " --compiler-options '-Wl,-Bstatic'"
             if (len(sharedLibrary) == 0):
                 liba = ' -static'
         for l in staticLibrary:
             liba += ' -l' + l[3:-2]
-        return self.cmdName + opt + objects + ' -o ' + targetName + ldir + idir + liba + libso
+        s = self.vcmd() + ' ' + self.voptions() + self._incStr_() + objects
+        s += ' -o ' + targetName + ldir + liba + libso
+        return s
 
 class Shared(CC):
     def __init__(self):
         CC.__init__(self)
-        self.name = 'nvidia-cuda-shared'
+        self.name = 'nvs'
         self.options = "-compiler-options '-fPIC' "
         self.includeDir = []
         self.libraryDir = []
@@ -90,47 +86,42 @@ class Shared(CC):
         self.options = ''
 
     def _buildCommand_(self,objNames,targetName):
-        opt = ' --shared ' + self.options
+        opt = ' --shared ' + self.voptions()
         objects = ' '
         for o in objNames:
             objects += ' ' + o
-        ldir = ''
+        ldir = ' '
         for l in self.libraryDir:
             ldir += ' -L' + l
-        idir = ''
-        for i in self.includeDir:
-            idir += ' -I' + i
-        lib = ''
+        lib = ' '
         if (len(self.library) > 0):
             lib = "--compiler-options '-Wl,--whole-archive'"
         for l in self.library:
             lib += ' -l' + l
         if (len(self.library) > 0):
             lib += "--compiler-options '-Wl,--no-whole-archive'"
-        return self.cmdName + opt + objects + ' -o ' + targetName + ldir + idir + lib
+        return self.vcmd() + opt + objects + ' -o ' + targetName + ldir + self._incStr_() + lib
 
 class Static(CC):
     def __init__(self):
         CC.__init__(self)
-        self.name = 'nvidia-cuda-archiver'
+        self.name = 'nva'
         self.options = '--lib'
 
     def _buildCommand_(self,objNames,targetName):
-        opt = ' ' + self.options
         objects = ' '
         for o in objNames:
             objects += ' ' + o
-        return 'nvcc' + opt + ' ' + targetName + objects
+        return self.vcmd() + ' ' + self.voptions() + ' ' + targetName + objects
 
 class HostLinkObject(CC):
     def __init__(self):
         CC.__init__(self)
-        self.name = 'nvidia-cuda-host-link-object'
-        self.options = '--device-link'
+        self.name = 'nvh'
 
     def _buildCommand_(self,objNames,targetName):
-        opt = ' ' + self.options
+        opt = ' --device-link ' + self.voptions()
         objects = ' '
         for o in objNames:
             objects += ' ' + o
-        return 'nvcc' + opt + ' -o ' + targetName + objects
+        return self.vcmd() + opt + ' -o ' + targetName + objects

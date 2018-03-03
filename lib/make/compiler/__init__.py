@@ -14,9 +14,6 @@ class Compiler(object):
     def voptions(self):
         return '${OP' + self.name + '}'
     
-    def vinclude(self):
-        return '${IN' + self.name + '}'
-    
     def headerDep(self,srcName):
         allHdr = self._findIncludeFiles_(srcName)
         #only keep the headers that exist in the root directory
@@ -43,15 +40,8 @@ class Compiler(object):
     
     def _buildCommand_(self,objNames,targetName):
         return 'echo '
-
-    def _incStr_(self):
-        inc = ''
-        for h in self.includeDir:
-            inc += '-I' + h + ' '
-        return inc
         
     def __str__(self):
         s = self.vcmd()[2:-1] + ' = ' + self.cmdName + '\n'
         s += self.voptions()[2:-1] + ' = ' + self.options + '\n'
-        s += self.vinclude()[2:-1] + ' = ' + self._incStr_() + '\n'
         return s
