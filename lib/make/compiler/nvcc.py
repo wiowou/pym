@@ -25,8 +25,8 @@ class CC(Compiler):
         return idir + ' '        
     
     def _sourceToObjectCommand_(self,objFileName,srcName):
-        s = self.vcmd() + ' ' + self.voptions() + self._incStr_()
-        s += '-o ' + objFileName + ' ' + srcName
+        s = self.vcmd() + ' ' + self.voptions() + self._incStr_() + srcName
+        s += ' -o ' + objFileName
         return s
     
     def _findIncludeFiles_(self, srcName):
@@ -71,8 +71,11 @@ class Exe(CC):
                 liba = ' -static'
         for l in staticLibrary:
             liba += ' -l' + l[3:-2]
-        s = self.vcmd() + ' ' + self.voptions() + self._incStr_() + objects
-        s += ' -o ' + targetName + ldir + liba + libso
+        lib = liba + libso
+        if (len(lib) > 0):
+            lib += ' '
+        s = self.vcmd() + ' ' + self.voptions() + self._incStr_()  + ldir + lib + objects
+        s += ' -o ' + targetName 
         return s
 
 class Shared(CC):
@@ -83,24 +86,25 @@ class Shared(CC):
         self.includeDir = []
         self.libraryDir = []
         self.library = []
-        self.options = ''
 
     def _buildCommand_(self,objNames,targetName):
         opt = ' --shared ' + self.voptions()
-        objects = ' '
+        objects = ''
         for o in objNames:
-            objects += ' ' + o
-        ldir = ' '
+            objects += o + ' '
+        ldir = ''
         for l in self.libraryDir:
             ldir += ' -L' + l
-        lib = ' '
+        lib = ''
         if (len(self.library) > 0):
             lib = "--compiler-options '-Wl,--whole-archive'"
         for l in self.library:
             lib += ' -l' + l
         if (len(self.library) > 0):
             lib += "--compiler-options '-Wl,--no-whole-archive'"
-        return self.vcmd() + opt + objects + ' -o ' + targetName + ldir + self._incStr_() + lib
+        if (len(lib) > 0):
+            lib += ' '
+        return self.vcmd() + opt + self._incStr_() + ldir + lib + objects + '-o ' + targetName
 
 class Static(CC):
     def __init__(self):

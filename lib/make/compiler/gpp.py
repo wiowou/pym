@@ -6,8 +6,8 @@ class GNU_Compiler(Compiler):
         self.options = ''
 
     def _sourceToObjectCommand_(self,objFileName,srcName):
-        s = self.vcmd() + ' ' + self.voptions() + self._incStr_()
-        s += '-o ' + objFileName + ' ' + srcName
+        s = self.vcmd() + ' ' + self.voptions() + self._incStr_() + srcName
+        s += ' -o ' + objFileName
         return s
     
     def _findIncludeFiles_(self, srcName):
@@ -36,23 +36,26 @@ class GNUExe(Compiler):
         objects = ''
         for o in objNames:
             objects += ' ' + o
-        ldir = ' '
+        ldir = ''
         for l in self.libraryDir:
             ldir += ' -L' + l
-        libso = ' '
+        libso = ''
         if len(sharedLibrary) > 0 and len(staticLibrary) > 0:
             libso = ' -Wl,-Bdynamic'
         for l in sharedLibrary:
             libso += ' -l' + l[3:-3]
-        liba = ' '
+        liba = ''
         if len(staticLibrary) > 0:
             liba = ' -Wl,-Bstatic'
             if (len(sharedLibrary) == 0):
                 liba = ' -static'
         for l in staticLibrary:
             liba += ' -l' + l[3:-2]
-        s = self.vcmd() + ' ' + self.voptions() + self._incStr_() + objects
-        s += ' -o ' + targetName + ldir + liba + libso
+        lib = liba + libso
+        if (len(lib) > 0):
+            lib += ' '
+        s = self.vcmd() + ' ' + self.voptions() + self._incStr_()  + ldir + lib + objects
+        s += ' -o ' + targetName
         return s
 
 class SharedLib(Compiler):
@@ -61,11 +64,11 @@ class SharedLib(Compiler):
         self.includeDir = []
         self.libraryDir = []
         self.library = []
-        self.options = ''
+        self.options = '-fPIC '
 
     def _buildCommand_(self,objNames,targetName):
-        opt = ' -shared -fPIC ' + self.voptions()
-        objects = ' '
+        opt = '-shared ' + self.voptions()
+        objects = ''
         for o in objNames:
             objects += ' ' + o
         ldir = ' '
@@ -78,7 +81,9 @@ class SharedLib(Compiler):
             lib += ' -l' + l
         if (len(self.library) > 0):
             lib += ' -Wl,--no-whole-archive'
-        return self.vcmd() + opt + objects + ' -o ' + targetName + ldir + self._incStr_() + lib
+        if (len(lib) > 0):
+            lib += ' '
+        return self.vcmd() + opt + self._incStr_() + ldir + lib + objects + ' -o ' + targetName
 
 class StaticLib(Compiler):
     def __init__(self):
