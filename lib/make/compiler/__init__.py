@@ -2,6 +2,7 @@ import os
 
 class Compiler(object):
     def __init__(self):
+        self.name = ''
         self.cmdName = ''
         self.options = ''
         self.includeDir = []

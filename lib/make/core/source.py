@@ -31,4 +31,7 @@ class Source(object):
         outputDir = self.outputDir
         if (outputDir == ''):
             outputDir = 'ob'
+        if (self.compiler.name == ''):
+            o = self.name
+            outputDir = ''
         return os.path.join(outputDir,o)

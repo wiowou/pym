@@ -21,23 +21,25 @@ class Makefile():
                 compiler[s.compiler.name+s.compiler.options] = s.compiler
         fout = open(name,'w')
         for c in compiler.values():
-            fout.write(str(c)+'\n')
+            if (not c.name == ''):
+                fout.write(str(c)+'\n')
         fout.write('\n')
         fout.write(allStr+'\n\n')
         for t in self.target:
             fout.write(str(t)+'\n')
         fout.write('\n')
         for s in source.values():
-            fout.write(str(s)+'\n')
+            if (not s.compiler.name == ''):
+                fout.write(str(s)+'\n')
         cleanStr = 'clean : \n'
-        if (os.name == 'nt'):
-            cleanStr += '\trmdir \s ob\n'
-        else:
-            cleanStr += '\trm -r ob\n'
-        cleanStr += '\tmkdir ob\n'
-        cleanallStr = 'cleanall : clean\n'
         for t in self.target:
-            cleanallStr += '\trm ' + t.name + '\n'
+            cleanStr += '\trm -f ' + t.name + '\n'
+        cleanallStr = 'cleanall : clean\n'
+        if (os.name == 'nt'):
+            cleanallStr += '\trmdir \s ob\n'
+        else:
+            cleanallStr += '\trm -rf ob\n'
+        cleanallStr += '\tmkdir ob\n'
         fout.write(cleanStr+'\n')
         fout.write(cleanallStr+'\n')
         fout.close()

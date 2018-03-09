@@ -82,7 +82,7 @@ class Shared(CC):
     def __init__(self):
         CC.__init__(self)
         self.name = 'nvs'
-        self.options = "-compiler-options '-fPIC' "
+        self.options = "--compiler-options '-fPIC' "
         self.includeDir = []
         self.libraryDir = []
         self.library = []
