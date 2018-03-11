@@ -1,7 +1,9 @@
 import os 
 
+from make.compiler import Compiler
+
 class Target(object):
-    def __init__(self,name,compiler):
+    def __init__(self,name,compiler=Compiler()):
         self.name = name
         self.compiler = compiler
         self.target = []
