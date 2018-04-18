@@ -96,12 +96,12 @@ class Shared(CC):
         for l in self.libraryDir:
             ldir += ' -L' + l
         lib = ''
-        if (len(self.library) > 0):
-            lib = "--compiler-options '-Wl,--whole-archive'"
-        for l in self.library:
-            lib += ' -l' + l
-        if (len(self.library) > 0):
-            lib += "--compiler-options '-Wl,--no-whole-archive'"
+        #if (len(self.library) > 0):
+        #    lib = "--compiler-options '-Wl,--whole-archive'"
+        for l in self.library: #assume that only static libs are linked to dynamic libs
+            lib += ' -l' + l[3:-3]
+        #if (len(self.library) > 0):
+        #    lib += "--compiler-options '-Wl,--no-whole-archive'"
         if (len(lib) > 0):
             lib += ' '
         return self.vcmd() + opt + self._incStr_() + ldir + lib + objects + '-o ' + targetName
