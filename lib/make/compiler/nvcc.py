@@ -22,7 +22,7 @@ class CC(Compiler):
             else:
                 idir += ',' + i
             j += 1
-        return idir + ' '        
+        return idir + ' '    
     
     def _sourceToObjectCommand_(self,objFileName,srcName):
         s = self.vcmd() + ' ' + self.voptions() + self._incStr_() + srcName

@@ -4,7 +4,18 @@ class GNU_Compiler(Compiler):
     def __init__(self):
         Compiler.__init__(self)
         self.options = ''
-
+    
+    def _incStr_(self):
+        idir = ''
+        j = 0
+        for i in self.includeDir:
+            if (j == 0):
+                idir += ' -I' + i
+            else:
+                idir += ',' + i
+            j += 1
+        return idir + ' '
+    
     def _sourceToObjectCommand_(self,objFileName,srcName):
         s = self.vcmd() + ' ' + self.voptions() + self._incStr_() + srcName
         s += ' -o ' + objFileName
